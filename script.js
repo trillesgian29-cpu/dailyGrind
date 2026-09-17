@@ -750,37 +750,96 @@ if (resetWeekBtn) {
 // 11. AUTHENTICATION HANDLERS & CLOUD SYNC
 // ============================================================
 
-// 1. ILAGAY DITO ANG FUNCTION:
-function hideLoginForm() {
-  const modal = document.getElementById('loginModal') || document.getElementById('authModal');
-  if (modal) {
-    modal.style.display = 'none'; // Tinatago ang login overlay
-  }
+// Function para itago ang Login Popup at Ipakita ang Dashboard
+function showDashboard() {
+  const overlay = document.getElementById('authOverlay');
+  const appContent = document.getElementById('appContent');
+  
+  if (overlay) overlay.style.display = 'none';
+  if (appContent) appContent.style.display = 'block';
 }
 
-// 2. Form Submit Event Handler
+// Function para ipakita ang Login at Itago ang Dashboard
+function showLogin() {
+  const overlay = document.getElementById('authOverlay');
+  const appContent = document.getElementById('appContent');
+  
+  if (overlay) overlay.style.display = 'flex';
+  if (appContent) appContent.style.display = 'none';
+}
+
+// Form Submit Event Handler (Login / Auto-Register)
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value.trim();
+    const errorEl = document.getElementById('authError');
+
+    if (errorEl) errorEl.textContent = '';
 
     try {
       await auth.signInWithEmailAndPassword(email, password);
-      alert("Login successful!");
-      hideLoginForm(); // <--- Tinatawag dito pagka-submit
+      showDashboard();
     } catch (error) {
-      alert("Login error: " + error.message);
+      // Kung wala pang account, awtomatikong igagawa ng account
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        try {
+          await auth.createUserWithEmailAndPassword(email, password);
+          showDashboard();
+        } catch (regErr) {
+          if (errorEl) errorEl.textContent = "Registration Error: " + regErr.message;
+        }
+      } else {
+        if (errorEl) errorEl.textContent = "Login Error: " + error.message;
+      }
     }
   });
 }
 
-// 3. Auth State Listener
+// Logout Button Handler
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => {
+      showLogin();
+    });
+  });
+}
+
+// Auth State Listener & Firestore Cloud Sync
 auth.onAuthStateChanged((user) => {
   if (user) {
-    hideLoginForm(); // <--- Tinatawag din dito kapag na-detect na naka-login ka na
-    // ... (rest of your firestore loading code)
+    // 1. Ipakita ang Dashboard UI
+    showDashboard();
+
+    // 2. I-display ang Email ng User sa Header
+    const userEmailTag = document.getElementById('userEmailTag');
+    if (userEmailTag) {
+      userEmailTag.textContent = user.email;
+    }
+
+    // 3. I-fetch ang User Data mula sa Firestore
+    db.collection("users").doc(user.uid).get()
+      .then((doc) => {
+        if (doc.exists) {
+          state = doc.data();
+          if (typeof STORAGE_KEY !== 'undefined') {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          }
+        } else {
+          if (typeof saveState === 'function') saveState();
+        }
+        if (typeof renderAll === 'function') renderAll();
+      })
+      .catch((err) => {
+        console.error("Cloud fetch error:", err);
+      });
+
+  } else {
+    // Kapag walang naka-login, ibalik sa Login Screen
+    showLogin();
   }
 });
 
