@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lingguhang Grind — Ultimate Master Dashboard</title>
+<meta name="description" content="Personal na workout, meal, at palengke planner dashboard na may rich infographics.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="dashboard-app">
+
+  <!-- HEADER CONTROLS & FOCUS -->
+  <header class="top-dashboard">
+    <!-- Control Box -->
+    <div class="dash-card card-controls">
+      <div class="card-title">Start of Week 📌</div>
+      <input type="date" id="weekStartDate" class="date-picker-input">
+      <div class="btn-group">
+        <button type="button" class="dash-btn btn-save" id="saveFocusBtn">Save 💾</button>
+        <button type="button" class="dash-btn btn-clear" id="resetWeekBtn">Reset 🔄</button>
+      </div>
+    </div>
+
+    <!-- Weekly Focus Box -->
+    <div class="dash-card card-focus">
+      <div class="focus-item">
+        <span class="focus-label">Weekly Focus 🎯</span>
+        <input type="text" id="focusInput" placeholder="Hal: Bawas timbang at tuloy-tuloy na intense circuit">
+      </div>
+      <div class="focus-item">
+        <span class="focus-label">Reward 🏆</span>
+        <input type="text" id="rewardInput" placeholder="Hal: Bagong athletic gear / Cheat meal">
+      </div>
+      <div class="focus-item">
+        <span class="focus-label">Affirmation 🧠</span>
+        <input type="text" id="affirmationInput" placeholder="Hal: Bawal sumuko, pitong laban!">
+      </div>
+    </div>
+
+    <!-- Overall Progress Widget -->
+    <div class="dash-card card-overall">
+      <div class="card-title">Overall Progress 📊</div>
+      <div class="overall-content">
+        <div class="bar-chart-wrap">
+          <canvas id="overallBarChart"></canvas>
+        </div>
+        <div class="overall-ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="40"></circle>
+            <circle class="ring-fg" id="overallRingFill" cx="50" cy="50" r="40" transform="rotate(-90 50 50)"></circle>
+          </svg>
+          <div class="overall-ring-text" id="overallPercentText">0%</div>
+          <div class="completed-counter" id="completedCounterText">0 / 0 Done</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CATEGORY INFOGRAPHICS ROW (Market, Exercise, Meal) -->
+  <section class="category-analytics-row">
+    
+    <!-- 🛒 PAGBILI / MARKET INFOGRAPHICS -->
+    <div class="dash-card category-card">
+      <div class="card-title">🛒 Palengke & Inventory Stats</div>
+      <div class="category-analytics-body">
+        <div class="gauge-box">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="36"></circle>
+            <circle class="ring-fg" id="marketRingFill" cx="50" cy="50" r="36" transform="rotate(-90 50 50)" style="stroke: var(--accent-tomato);"></circle>
+          </svg>
+          <div class="ring-stat-text" id="marketPctText">0%</div>
+        </div>
+        <div class="cat-info">
+          <div class="cat-stat-label">Bilihin & Sangkap Progress</div>
+          <div class="cat-stat-num" id="marketCountText">0 / 0 Checkmarks</div>
+          <p class="cat-subtext">Mon, Wed, Fri, Sun = Bilihin | Tue, Thu, Sat = Inventory.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🏋️ EXERCISE INFOGRAPHICS -->
+    <div class="dash-card category-card">
+      <div class="card-title">🏋️ Exercise Routine Stats</div>
+      <div class="category-analytics-body">
+        <div class="gauge-box">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="36"></circle>
+            <circle class="ring-fg" id="exerciseRingFill" cx="50" cy="50" r="36" transform="rotate(-90 50 50)" style="stroke: var(--accent-gold);"></circle>
+          </svg>
+          <div class="ring-stat-text" id="exercisePctText">0%</div>
+        </div>
+        <div class="cat-info">
+          <div class="cat-stat-label">Workout Completion</div>
+          <div class="cat-stat-num" id="exerciseCountText">0 / 0 Routines</div>
+          <p class="cat-subtext">Pushups, Cardio, Legs & Core Circuits.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🥗 MEAL PLAN INFOGRAPHICS -->
+    <div class="dash-card category-card">
+      <div class="card-title">🥗 Meal Plan Stats</div>
+      <div class="category-analytics-body">
+        <div class="gauge-box">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="36"></circle>
+            <circle class="ring-fg" id="mealRingFill" cx="50" cy="50" r="36" transform="rotate(-90 50 50)" style="stroke: var(--accent-green);"></circle>
+          </svg>
+          <div class="ring-stat-text" id="mealPctText">0%</div>
+        </div>
+        <div class="cat-info">
+          <div class="cat-stat-label">Diet & Meal Compliance</div>
+          <div class="cat-stat-num" id="mealCountText">0 / 0 Meals</div>
+          <p class="cat-subtext">Tokwa, Monggo, Itlog & Low-carb dinners.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- HABIT TRACKER SECTION WITH LINE INFOGRAPHIC CHART -->
+  <section class="dash-card habit-dashboard-section">
+    <div class="card-title">📈 Habit Tracker & Consistency Line Infographic</div>
+    <div class="habit-grid-layout">
+      <!-- Habit Table -->
+      <div class="habit-table-wrap">
+        <table class="habit-table">
+          <thead>
+            <tr id="habitHeadRow"></tr>
+          </thead>
+          <tbody id="habitBody"></tbody>
+        </table>
+      </div>
+      <!-- Habit Line Trend Chart -->
+      <div class="habit-chart-box">
+        <div class="chart-header-title">Daily Habit Trend</div>
+        <div style="height: 140px; position: relative;">
+          <canvas id="habitLineChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN 7-DAY DASHBOARD GRID (ALL CHECKLISTS) -->
+  <section class="days-dashboard-grid" id="daysGrid"></section>
+
+  <!-- PROGRESS HISTORY GRAPH SECTION -->
+  <section class="history-dashboard-section">
+    <div class="section-title">📊 Progress History (Nakalipas na mga Linggo)</div>
+    <p class="section-desc">Awtomatikong nai-record ang tsart na ito tuwing nagse-save/reset ka ng linggo.</p>
+    <div class="history-chart-container">
+      <canvas id="historyChart"></canvas>
+    </div>
+  </section>
+
+  <!-- FOOTER TIPS -->
+  <footer class="tips-section">
+    <h2>💡 Gabay sa Pagluluto at Pag-iimbak</h2>
+    <ul class="tips-list">
+      <li><strong>Tokwa Preservation</strong> — Ilagay sa malinis na lalagyan na may tubig at konting asin. Palitan ang tubig araw-araw para tumagal ng 3-4 araw.</li>
+      <li><strong>Itlog</strong> — Pwedeng i-room temp, tumatagal 1–2 linggo sa cool at shaded na lugar.</li>
+      <li><strong>Monggo (dried)</strong> — Matagal tumagal kahit walang ref, basta tuyo ang lalagyan.</li>
+      <li><strong>Kangkong at Sitaw</strong> — Mabilis masira, kaya lutuin agad sa araw na binili o kinabukasan.</li>
+    </ul>
+    <p class="footer-note">Naka-save sa local browser storage mo ang buong data — panatilihing aktibo ang iyong disiplina!</p>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
