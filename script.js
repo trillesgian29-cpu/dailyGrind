@@ -1,5 +1,26 @@
 // ============================================================
-// DATA — Full Schedule (Market, Inventory, Workouts, Recipes)
+// 1. FIREBASE INITIALIZATION & CONFIGURATION
+// ============================================================
+// ⚠️ PALITAN ANG MGA VALUES SA ILALIM MULA SA FIREBASE CONSOLE:
+// Project Settings (⚙️) ➔ General ➔ Your apps ➔ Web App (SDK setup/configuration)
+const firebaseConfig = {
+  apiKey: "AIzaSyC-pxNm30epmjySVvvJ2YEsNOXKAVE4oKY",
+  authDomain: "lingguhang-grind.firebaseapp.com",
+  projectId: "lingguhang-grind",
+  storageBucket: "lingguhang-grind.firebasestorage.app",
+  messagingSenderId: "524469237908",
+  appId: "1:524469237908:web:ec8ce37d581fe00ca79c81"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ============================================================
+// 2. DATA — Full Schedule (Market, Inventory, Workouts, Recipes)
 // ============================================================
 const WEEK_DATA = [
   {
@@ -210,7 +231,7 @@ const HABITS = [
 ];
 
 // ============================================================
-// STORAGE & STATE MANAGEMENT
+// 3. STORAGE & STATE MANAGEMENT (Local + Cloud)
 // ============================================================
 const STORAGE_KEY = "lingguhang-grind-master-v5";
 
@@ -249,13 +270,21 @@ function getDefaultState() {
 }
 
 function saveState() {
+  // Save sa LocalStorage
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  // Sync sa Cloud Firestore kung naka-login ang user
+  const user = auth.currentUser;
+  if (user) {
+    db.collection("users").doc(user.uid).set(state)
+      .catch((err) => console.error("Cloud Sync Error:", err));
+  }
 }
 
 let state = loadState();
 
 // ============================================================
-// HELPERS
+// 4. HELPERS
 // ============================================================
 function todayKey() {
   const jsDay = new Date().getDay();
@@ -302,49 +331,63 @@ function getHabitCompletion(habitKey) {
 }
 
 // ============================================================
-// RENDER — Controls & Focus
+// 5. RENDER — Controls & Focus
 // ============================================================
 function renderFocusControls() {
-  document.getElementById('weekStartDate').value = state.focus.startDate || '';
-  document.getElementById('focusInput').value = state.focus.focus || '';
-  document.getElementById('rewardInput').value = state.focus.reward || '';
-  document.getElementById('affirmationInput').value = state.focus.affirmation || '';
+  const weekStartDate = document.getElementById('weekStartDate');
+  const focusInput = document.getElementById('focusInput');
+  const rewardInput = document.getElementById('rewardInput');
+  const affirmationInput = document.getElementById('affirmationInput');
+
+  if (weekStartDate) weekStartDate.value = state.focus.startDate || '';
+  if (focusInput) focusInput.value = state.focus.focus || '';
+  if (rewardInput) rewardInput.value = state.focus.reward || '';
+  if (affirmationInput) affirmationInput.value = state.focus.affirmation || '';
 }
 
-document.getElementById('saveFocusBtn').addEventListener('click', () => {
-  state.focus = {
-    startDate: document.getElementById('weekStartDate').value,
-    focus: document.getElementById('focusInput').value,
-    reward: document.getElementById('rewardInput').value,
-    affirmation: document.getElementById('affirmationInput').value
-  };
-  saveState();
-  alert("Nai-save ang iyong Weekly Focus!");
-});
+const saveFocusBtn = document.getElementById('saveFocusBtn');
+if (saveFocusBtn) {
+  saveFocusBtn.addEventListener('click', () => {
+    state.focus = {
+      startDate: document.getElementById('weekStartDate').value,
+      focus: document.getElementById('focusInput').value,
+      reward: document.getElementById('rewardInput').value,
+      affirmation: document.getElementById('affirmationInput').value
+    };
+    saveState();
+    alert("Nai-save ang iyong Weekly Focus!");
+  });
+}
 
 // ============================================================
-// RENDER — Category Analytics
+// 6. RENDER — Category Analytics
 // ============================================================
 function renderCategoryAnalytics() {
   // Market / Inventory
   const mStats = getCategoryStats('market');
   const mPct = Math.round(mStats.pct * 100);
-  document.getElementById('marketPctText').textContent = mPct + '%';
-  document.getElementById('marketCountText').textContent = `${mStats.done} / ${mStats.total} Checkmarks`;
+  const marketPctText = document.getElementById('marketPctText');
+  const marketCountText = document.getElementById('marketCountText');
+  if (marketPctText) marketPctText.textContent = mPct + '%';
+  if (marketCountText) marketCountText.textContent = `${mStats.done} / ${mStats.total} Checkmarks`;
   updateRing('marketRingFill', mStats.pct, 36);
 
   // Exercise
   const eStats = getCategoryStats('exercises');
   const ePct = Math.round(eStats.pct * 100);
-  document.getElementById('exercisePctText').textContent = ePct + '%';
-  document.getElementById('exerciseCountText').textContent = `${eStats.done} / ${eStats.total} Routines`;
+  const exercisePctText = document.getElementById('exercisePctText');
+  const exerciseCountText = document.getElementById('exerciseCountText');
+  if (exercisePctText) exercisePctText.textContent = ePct + '%';
+  if (exerciseCountText) exerciseCountText.textContent = `${eStats.done} / ${eStats.total} Routines`;
   updateRing('exerciseRingFill', eStats.pct, 36);
 
   // Meal
   const mealStats = getCategoryStats('meals');
   const mealPct = Math.round(mealStats.pct * 100);
-  document.getElementById('mealPctText').textContent = mealPct + '%';
-  document.getElementById('mealCountText').textContent = `${mealStats.done} / ${mealStats.total} Meals`;
+  const mealPctText = document.getElementById('mealPctText');
+  const mealCountText = document.getElementById('mealCountText');
+  if (mealPctText) mealPctText.textContent = mealPct + '%';
+  if (mealCountText) mealCountText.textContent = `${mealStats.done} / ${mealStats.total} Meals`;
   updateRing('mealRingFill', mealStats.pct, 36);
 }
 
@@ -359,13 +402,14 @@ function updateRing(elementId, pct, radius) {
 }
 
 // ============================================================
-// RENDER — Habit Tracker & Trend Chart
+// 7. RENDER — Habit Tracker & Trend Chart
 // ============================================================
 let habitLineChartInstance = null;
 
 function renderHabitsSection() {
   const headRow = document.getElementById('habitHeadRow');
   const body = document.getElementById('habitBody');
+  if (!headRow || !body) return;
 
   headRow.innerHTML = `<th>Habit</th>` +
     WEEK_DATA.map(d => `<th>${d.name.slice(0,3)}</th>`).join('') +
@@ -412,7 +456,9 @@ function renderHabitsSection() {
   });
 
   // Habit Chart
-  const ctx = document.getElementById('habitLineChart').getContext('2d');
+  const habitChartEl = document.getElementById('habitLineChart');
+  if (!habitChartEl) return;
+  const ctx = habitChartEl.getContext('2d');
   if (habitLineChartInstance) habitLineChartInstance.destroy();
 
   habitLineChartInstance = new Chart(ctx, {
@@ -443,11 +489,12 @@ function renderHabitsSection() {
 }
 
 // ============================================================
-// RENDER — 7 Day Columns Grid
+// 8. RENDER — 7 Day Columns Grid
 // ============================================================
 const daysGrid = document.getElementById('daysGrid');
 
 function renderDaysGrid() {
+  if (!daysGrid) return;
   daysGrid.innerHTML = '';
   const currentToday = todayKey();
 
@@ -533,11 +580,13 @@ function renderDaysGrid() {
     daysGrid.appendChild(col);
 
     const ringFill = col.querySelector(`[data-ring="${day.key}"]`);
-    const circumference = 2 * Math.PI * 36;
-    const offset = circumference * (1 - stats.pct);
-    ringFill.style.strokeDasharray = circumference;
-    ringFill.style.opacity = stats.pct <= 0.001 ? "0" : "1";
-    requestAnimationFrame(() => { ringFill.style.strokeDashoffset = offset; });
+    if (ringFill) {
+      const circumference = 2 * Math.PI * 36;
+      const offset = circumference * (1 - stats.pct);
+      ringFill.style.strokeDasharray = circumference;
+      ringFill.style.opacity = stats.pct <= 0.001 ? "0" : "1";
+      requestAnimationFrame(() => { ringFill.style.strokeDashoffset = offset; });
+    }
   });
 
   daysGrid.querySelectorAll('input[type="checkbox"]').forEach(box => {
@@ -560,7 +609,7 @@ function onCheckToggle(e) {
 }
 
 // ============================================================
-// RENDER — Overall Progress Bar & Donut Gauge
+// 9. RENDER — Overall Progress Bar & Donut Gauge
 // ============================================================
 let barChartInstance = null;
 
@@ -583,17 +632,23 @@ function renderOverallWidget() {
   const weekPct = totalAll === 0 ? 0 : doneAll / totalAll;
   const pctInt = Math.round(weekPct * 100);
 
-  document.getElementById('overallPercentText').textContent = pctInt + '%';
-  document.getElementById('completedCounterText').textContent = `${doneAll} / ${totalAll} Done`;
+  const overallPercentText = document.getElementById('overallPercentText');
+  const completedCounterText = document.getElementById('completedCounterText');
+  if (overallPercentText) overallPercentText.textContent = pctInt + '%';
+  if (completedCounterText) completedCounterText.textContent = `${doneAll} / ${totalAll} Done`;
 
   const ringFill = document.getElementById('overallRingFill');
-  const circumference = 2 * Math.PI * 40;
-  const offset = circumference * (1 - weekPct);
-  ringFill.style.strokeDasharray = circumference;
-  ringFill.style.opacity = weekPct <= 0.001 ? "0" : "1";
-  requestAnimationFrame(() => { ringFill.style.strokeDashoffset = offset; });
+  if (ringFill) {
+    const circumference = 2 * Math.PI * 40;
+    const offset = circumference * (1 - weekPct);
+    ringFill.style.strokeDasharray = circumference;
+    ringFill.style.opacity = weekPct <= 0.001 ? "0" : "1";
+    requestAnimationFrame(() => { ringFill.style.strokeDashoffset = offset; });
+  }
 
-  const ctx = document.getElementById('overallBarChart').getContext('2d');
+  const overallBarChartEl = document.getElementById('overallBarChart');
+  if (!overallBarChartEl) return;
+  const ctx = overallBarChartEl.getContext('2d');
   if (barChartInstance) barChartInstance.destroy();
 
   barChartInstance = new Chart(ctx, {
@@ -618,12 +673,15 @@ function renderOverallWidget() {
 }
 
 // ============================================================
-// RENDER — History Chart
+// 10. RENDER — History Chart
 // ============================================================
 let historyChartInstance = null;
 
 function renderHistoryChart() {
-  const ctx = document.getElementById('historyChart').getContext('2d');
+  const historyChartEl = document.getElementById('historyChart');
+  if (!historyChartEl) return;
+  const ctx = historyChartEl.getContext('2d');
+
   const labels = state.history.map((_, i) => `Week ${i + 1}`);
   const scores = state.history.map(item => item.score);
 
@@ -656,37 +714,80 @@ function renderHistoryChart() {
   });
 }
 
-// Reset button
-document.getElementById('resetWeekBtn').addEventListener('click', () => {
-  let totalAll = 0;
-  let doneAll = 0;
+// Reset button handler
+const resetWeekBtn = document.getElementById('resetWeekBtn');
+if (resetWeekBtn) {
+  resetWeekBtn.addEventListener('click', () => {
+    let totalAll = 0;
+    let doneAll = 0;
 
-  WEEK_DATA.forEach(day => {
-    const stats = getDayStats(day);
-    totalAll += stats.total;
-    doneAll += stats.done;
+    WEEK_DATA.forEach(day => {
+      const stats = getDayStats(day);
+      totalAll += stats.total;
+      doneAll += stats.done;
+    });
+
+    const weekPct = totalAll === 0 ? 0 : Math.round((doneAll / totalAll) * 100);
+
+    if (!confirm(`I-reset ang buong linggo at i-record ang kasalukuyang score (${weekPct}%) sa History Graph?`)) return;
+
+    state.history.push({
+      date: new Date().toLocaleDateString('tl-PH'),
+      score: weekPct
+    });
+
+    state.market = {};
+    state.exercises = {};
+    state.meals = {};
+    state.habits = {};
+
+    saveState();
+    renderAll();
   });
+}
 
-  const weekPct = totalAll === 0 ? 0 : Math.round((doneAll / totalAll) * 100);
+// ============================================================
+// 11. AUTHENTICATION HANDLERS & CLOUD SYNC
+// ============================================================
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
 
-  if (!confirm(`I-reset ang buong linggo at i-record ang kasalukuyang score (${weekPct}%) sa History Graph?`)) return;
-
-  state.history.push({
-    date: new Date().toLocaleDateString('tl-PH'),
-    score: weekPct
+    auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        alert("Login successful! Welcome back.");
+      })
+      .catch((error) => {
+        // Automatic account creation kung bago ang email
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          auth.createUserWithEmailAndPassword(email, password)
+            .then(() => alert("New account created and logged in!"))
+            .catch((regErr) => alert("Registration Failed: " + regErr.message));
+        } else {
+          alert("Login Error: " + error.message);
+        }
+      });
   });
+}
 
-  state.market = {};
-  state.exercises = {};
-  state.meals = {};
-  state.habits = {};
-
-  saveState();
-  renderAll();
+// Real-time Auth State Change (Mag-a-auto-load ng cloud data)
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    db.collection("users").doc(user.uid).get().then((doc) => {
+      if (doc.exists) {
+        state = doc.data();
+        saveState();
+      }
+      renderAll();
+    }).catch(err => console.error("Cloud fetch error:", err));
+  }
 });
 
 // ============================================================
-// INITIALIZATION
+// 12. INITIALIZATION
 // ============================================================
 function renderAll() {
   renderFocusControls();
