@@ -749,87 +749,38 @@ if (resetWeekBtn) {
 // ============================================================
 // 11. AUTHENTICATION HANDLERS & CLOUD SYNC
 // ============================================================
-const loginForm = document.getElementById('loginForm');
-const loginModal = document.getElementById('loginModal') || document.getElementById('authModal');
-const userStatusEl = document.getElementById('userStatus'); // Element para sa user email/logout button
 
-// Login / Register Handler
+// 1. ILAGAY DITO ANG FUNCTION:
+function hideLoginForm() {
+  const modal = document.getElementById('loginModal') || document.getElementById('authModal');
+  if (modal) {
+    modal.style.display = 'none'; // Tinatago ang login overlay
+  }
+}
+
+// 2. Form Submit Event Handler
+const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value.trim();
 
-    if (!email || !password) {
-      alert("Paki-lagay ang Email at Password.");
-      return;
-    }
-
     try {
-      // Subukang mag-login
       await auth.signInWithEmailAndPassword(email, password);
       alert("Login successful!");
-      hideLoginForm();
+      hideLoginForm(); // <--- Tinatawag dito pagka-submit
     } catch (error) {
-      // Kung wala pang account ang email, ikaw ay i-r-register
-      if (error.code === 'auth/user-not-found') {
-        try {
-          await auth.createUserWithEmailAndPassword(email, password);
-          alert("Bagong account ay naisagawa at naka-login na!");
-          hideLoginForm();
-        } catch (regErr) {
-          alert("Registration Failed: " + regErr.message);
-        }
-      } else {
-        alert("Login Error (Tiyaking tama ang password): " + error.message);
-      }
+      alert("Login error: " + error.message);
     }
   });
 }
 
-// Function para itago ang Login Form pagkatapos mag-login
-function hideLoginForm() {
-  if (loginModal) {
-    loginModal.style.display = 'none';
-  }
-}
-
-// Automatic Auth State Listener & Cloud Sync
+// 3. Auth State Listener
 auth.onAuthStateChanged((user) => {
   if (user) {
-    // 1. Itago ang login modal kung naka-login na
-    hideLoginForm();
-
-    // 2. I-update ang UI status kung may status element sa HTML
-    if (userStatusEl) {
-      userStatusEl.innerHTML = `
-        <span>Naka-login bilang: <b>${user.email}</b></span>
-        <button id="logoutBtn" style="margin-left:10px; padding:4px 8px; cursor:pointer;">Logout</button>
-      `;
-      document.getElementById('logoutBtn')?.addEventListener('click', () => {
-        auth.signOut().then(() => alert("Naka-logout na."));
-      });
-    }
-
-    // 3. I-load ang Data mula sa Firestore
-    db.collection("users").doc(user.uid).get()
-      .then((doc) => {
-        if (doc.exists) {
-          state = doc.data();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } else {
-          // Kung bagong user, i-save ang initial state sa Firestore
-          saveState();
-        }
-        renderAll();
-      })
-      .catch(err => console.error("Cloud fetch error:", err));
-
-  } else {
-    // Kapag naka-logout
-    if (userStatusEl) {
-      userStatusEl.innerHTML = `<span>Not Logged In</span>`;
-    }
+    hideLoginForm(); // <--- Tinatawag din dito kapag na-detect na naka-login ka na
+    // ... (rest of your firestore loading code)
   }
 });
 
