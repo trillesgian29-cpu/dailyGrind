@@ -1,0 +1,9 @@
+{
+  "name": "Lingguhang Grind",
+  "short_name": "GrindApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121218",
+  "theme_color": "#e4b33d",
+  "icons": []
+}
