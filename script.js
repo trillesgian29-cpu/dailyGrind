@@ -1,8 +1,7 @@
 // ============================================================
-// 1. FIREBASE INITIALIZATION & CONFIGURATION
+// 1. FIREBASE INITIALIZATION
 // ============================================================
 // ⚠️ PALITAN ANG MGA VALUES SA ILALIM MULA SA FIREBASE CONSOLE:
-// Project Settings (⚙️) ➔ General ➔ Your apps ➔ Web App (SDK setup/configuration)
 const firebaseConfig = {
   apiKey: "AIzaSyC-pxNm30epmjySVvvJ2YEsNOXKAVE4oKY",
   authDomain: "lingguhang-grind.firebaseapp.com",
@@ -12,7 +11,6 @@ const firebaseConfig = {
   appId: "1:524469237908:web:ec8ce37d581fe00ca79c81"
 };
 
-// Initialize Firebase
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -20,220 +18,285 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
-// 2. DATA — Full Schedule (Market, Inventory, Workouts, Recipes)
+// 2. DATA — Full Schedule (Inayos para sa 5 PM Market + Preserved Tofu)
 // ============================================================
 const WEEK_DATA = [
   {
     key: "mon", name: "Monday", date: "Lunes", tag: "market", isMarketDay: true,
     market: [
-      "Bumili ng Tokwa (3 blocks - para sa Mon & Tue)",
-      "Kangkong (2 bundles)",
-      "Kamatis (1/2 kg) & Sibuyas / Bawang",
-      "Coconut Oil (check supply)"
+      "🛒 [5:00 PM Jog Run] Bumili ng Tokwa (3 blocks - para sa Tue/Wed)",
+      "🛒 Kangkong (2 bundles)",
+      "🛒 Kamatis (1/2 kg) & Sibuyas / Bawang",
+      "🛒 Coconut Oil (check supply)"
     ],
     meals: [
-      "🥣 Lunch: Ginisang Monggo + Tokwa",
-      "🍳 Dinner: Tokwa Scramble (Gisa bawang/sibuyas/kamatis, tokwa + 2 itlog, toyo/asin)",
+      "🥣 Lunch (1:00 PM): Ginisang Monggo + Tokwa (Stock mula Linggo)",
+      "🍳 Dinner (8:00 PM): Tokwa Scramble (Gisa bawang/sibuyas/kamatis + 2 itlog)",
       "💧 Hydration: Uminom ng 3L na Tubig"
     ],
     exercises: [
-      "🏃 Night Jog 3km (Palengke Run)",
-      "🔹 Push Circuit (10-10-10-5-10-10-10):",
-      "  - Normal Pushup (10 reps)",
-      "  - Diamond Pushup (10 reps)",
-      "  - Wide Pushup (10 reps)",
-      "  - Archer Pushup (5-5 reps)",
-      "  - Mike Tyson Pushup (10 reps)",
-      "  - Reverse Pushup (10 reps)",
-      "  - Normal Pushup (10 reps)",
-      "🔹 Core & Cardio (12x3 reps):",
-      "  - Side Mountain Climbers (12x3)",
-      "  - Cross Mountain Climbers (12x3)",
-      "  - Mountain Climbers (20x3)",
-      "  - Plank Jacks (15x3)",
-      "  - Shoulder Taps (15x3)",
-      "  - Plank Up-Downs (12x3)",
-      "🔹 Lower Body (12x3 reps):",
-      "  - Jump Squat (12x3)",
-      "  - Pop Squat (12x3)",
-      "  - Side Step Squat (12x3)",
-      "  - Squat to Calf Raise (15x3)",
-      "  - Surrender + Jump (12x3)"
+      "🏃 Night Jog 3km (Palengke Run sa Hapon - 5:00 PM)",
+      "🔹 Push Circuit (10-10-10-5-10-10-10): Normal, Diamond, Wide, Archer, Mike Tyson, Reverse",
+      "🔹 Core & Cardio (12x3 reps): Side/Cross Climbers, Plank Jacks, Shoulder Taps",
+      "🔹 Lower Body (12x3 reps): Jump Squat, Pop Squat, Side Step Squat, Surrender+Jump"
     ]
   },
   {
     key: "tue", name: "Tuesday", date: "Martes", tag: "regular", isMarketDay: false,
     market: [
-      "📦 Sangkap Check: Tokwa (kunin sa tubig na may asin)",
+      "📦 Sangkap Check: Tokwa (⚠️ ILUBOG SA TUBIG NA MAY ASIN para hindi mapanis)",
       "📦 Sangkap Check: Kangkong (hugas at hiwa)",
       "📦 Sangkap Check: 2 Itlog, Bawang, Sibuyas",
       "📦 Sangkap Check: Coconut oil & Toyo/Asin"
     ],
     meals: [
-      "🥗 Lunch: Ginisang Kangkong na may Tokwa at Itlog",
-      "🍳 Dinner: Tortang Tokwa (I-mash ang tokwa, ihalo sa 2 itlog, iprito nang golden brown)",
+      "🥗 Lunch (1:00 PM): Ginisang Kangkong na may Tokwa at Itlog",
+      "🍳 Dinner (8:00 PM): Tortang Tokwa (I-mash ang tokwa, ihalo sa 2 itlog, iprito)",
       "💧 Hydration: Uminom ng 3L na Tubig"
     ],
     exercises: [
-      "🏃 Evening Jogging 4.5km",
-      "🔹 Pushups Routine (12x3 reps):",
-      "  - Pike Pushup (12x3)",
-      "  - Sphinx Pushup (12x3)",
-      "  - Diamond Pushup (12x3)",
-      "  - Normal Pushup (15x3)",
-      "🔹 Core & Legs (12x3 reps):",
-      "  - Side Mountain Climbers (15x3)",
-      "  - Shoulder Taps (20x3)",
-      "  - Jump Squat (12x3)",
-      "  - Squat to Calf Raise (15x3)",
-      "  - Surrender + Jump (12x3)"
+      "🏃 Evening Jogging 4.5km (5:00 PM)",
+      "🔹 Pushups Routine (12x3 reps): Pike, Sphinx, Diamond, Normal Pushup",
+      "🔹 Core & Legs (12x3 reps): Side Climbers, Shoulder Taps, Jump Squat, Surrender+Jump"
     ]
   },
   {
     key: "wed", name: "Wednesday", date: "Miyerkules", tag: "market", isMarketDay: true,
     market: [
-      "Bumili ng Tokwa (3 blocks - para sa Wed & Thu)",
-      "Sitaw (1 tali)",
-      "Kamatis & Sibuyas/Bawang",
-      "Check asin/toyo supply"
+      "🛒 [5:00 PM Jog Run] Bumili ng Tokwa (3 blocks - para sa Thu/Fri)",
+      "🛒 Sitaw (1 tali)",
+      "🛒 Kamatis & Sibuyas/Bawang",
+      "🛒 Check asin/toyo supply"
     ],
     meals: [
-      "🥣 Lunch: Ginisang Monggo + Tokwa",
-      "🍳 Dinner: Tokwa Scramble (Gisado sa kamatis, tokwa + 2 itlog)",
+      "🥣 Lunch (1:00 PM): Ginisang Monggo / Leftover Tokwa",
+      "🍳 Dinner (8:00 PM): Tokwa Scramble (Gisado sa kamatis + 2 itlog)",
       "💧 Hydration: Uminom ng 3L na Tubig"
     ],
     exercises: [
-      "🏃 Night Jog 3km (Palengke Run)",
-      "🔹 Push Circuit (10-10-10-5-10-10-10):",
-      "  - Normal Pushup (10 reps)",
-      "  - Diamond Pushup (10 reps)",
-      "  - Wide Pushup (10 reps)",
-      "  - Archer Pushup (5-5 reps)",
-      "  - Mike Tyson Pushup (10 reps)",
-      "  - Reverse Pushup (10 reps)",
-      "🔹 Core & Cardio (12x3 reps):",
-      "  - Cross Mountain Climbers (15x3)",
-      "  - Plank Jacks (15x3)",
-      "  - Plank Up-Downs (12x3)",
-      "🔹 Legs Routine (12x3 reps):",
-      "  - Pop Squat (12x3)",
-      "  - Side Step Squat (12x3)",
-      "  - Surrender + Jump (12x3)"
+      "🏃 Night Jog 3km (Palengke Run sa Hapon - 5:00 PM)",
+      "🔹 Push Circuit (10-10-10-5-10-10-10): Normal, Diamond, Wide, Archer, Tyson, Reverse",
+      "🔹 Core & Cardio (12x3 reps): Cross Climbers, Plank Jacks, Plank Up-Downs",
+      "🔹 Legs Routine (12x3 reps): Pop Squat, Side Step Squat, Surrender + Jump"
     ]
   },
   {
     key: "thu", name: "Thursday", date: "Huwebes", tag: "regular", isMarketDay: false,
     market: [
-      "📦 Sangkap Check: Tokwa (sariwa sa tubig)",
+      "📦 Sangkap Check: Tokwa (⚠️ Siguraduhing nakatabi sa malinis na tubig na may asin)",
       "📦 Sangkap Check: Sitaw (hiwain sa 1-2 inches)",
-      "📦 Sangkap Check: 2-3 Itlog",
-      "📦 Sangkap Check: Kamatis, Bawang, Sibuyas"
+      "📦 Sangkap Check: 2-3 Itlog, Kamatis, Bawang, Sibuyas"
     ],
     meals: [
-      "🍳 Lunch: Tortang Tokwa (Patties/Omelette style)",
-      "🍲 Dinner: Ginisang Sitaw, Tokwa, Itlog (Takpan 3-5 mins, ihalo ang itlog)",
+      "🍳 Lunch (1:00 PM): Tortang Tokwa (Patties/Omelette style)",
+      "🍲 Dinner (8:00 PM): Ginisang Sitaw, Tokwa, Itlog",
       "💧 Hydration: Uminom ng 3L na Tubig"
     ],
     exercises: [
-      "🏃 Evening Jogging 4.5km",
-      "🔹 Upper Body & Core (12x3 reps):",
-      "  - Pike Pushup (12x3)",
-      "  - Sphinx Pushup (12x3)",
-      "  - Wide Pushup (15x3)",
-      "  - Shoulder Taps (20x3)",
-      "  - Mountain Climbers (20x3)",
-      "🔹 Lower Body Circuit (12x3 reps):",
-      "  - Jump Squat (15x3)",
-      "  - Side Step Squat (12x3)",
-      "  - Squat to Calf Raise (15x3)"
+      "🏃 Evening Jogging 4.5km (5:00 PM)",
+      "🔹 Upper Body & Core (12x3 reps): Pike, Sphinx, Wide Pushup, Shoulder Taps",
+      "🔹 Lower Body Circuit (12x3 reps): Jump Squat, Side Step Squat, Calf Raises"
     ]
   },
   {
     key: "fri", name: "Friday", date: "Biyernes", tag: "market", isMarketDay: true,
     market: [
-      "Bumili ng Tokwa (3 blocks - para sa Fri & Sat)",
-      "Kangkong / Gulay",
-      "Kamatis & Bawang/Sibuyas"
+      "🛒 [5:00 PM Jog Run] Bumili ng Tokwa (3 blocks - para sa Sat/Sun)",
+      "🛒 Kangkong / Gulay",
+      "🛒 Kamatis & Bawang/Sibuyas"
     ],
     meals: [
-      "🥗 Lunch: Ginisang Kangkong, Tokwa, Itlog",
-      "🍳 Dinner: Tokwa Scramble na may Kamatis",
+      "🥗 Lunch (1:00 PM): Ginisang Sitaw / Leftover Gulay at Tokwa",
+      "🍳 Dinner (8:00 PM): Tokwa Scramble na may Kamatis",
       "💧 Hydration: Uminom ng 3L na Tubig"
     ],
     exercises: [
-      "🏃 Night Jog 3km (Palengke Run)",
-      "🔹 Push Circuit (10-10-10-5-10-10-10):",
-      "  - Normal Pushup (10 reps)",
-      "  - Diamond Pushup (10 reps)",
-      "  - Wide Pushup (10 reps)",
-      "  - Archer Pushup (5-5 reps)",
-      "  - Mike Tyson Pushup (10 reps)",
-      "  - Reverse Pushup (10 reps)",
-      "🔹 Full Body Cardio (12x3 reps):",
-      "  - Side Mountain Climbers (15x3)",
-      "  - Cross Mountain Climbers (15x3)",
-      "  - Plank Jacks (15x3)",
-      "  - Surrender + Jump (12x3)"
+      "🏃 Night Jog 3km (Palengke Run sa Hapon - 5:00 PM)",
+      "🔹 Push Circuit (10-10-10-5-10-10-10)",
+      "🔹 Full Body Cardio (12x3 reps): Side/Cross Climbers, Plank Jacks, Surrender+Jump"
     ]
   },
   {
     key: "sat", name: "Saturday", date: "Sabado", tag: "regular", isMarketDay: false,
     market: [
-      "📦 Sangkap Check: Tokwa (hiwain nang malalapad para sa Steak)",
+      "📦 Sangkap Check: Tokwa (hiwain nang malalapad para sa Steak - itabi sa brine)",
       "📦 Sangkap Check: Kamatis (gawing sarsa)",
-      "📦 Sangkap Check: 1-2 Itlog (para sa Sunny Side Up)",
-      "📦 Sangkap Check: Bawang, Sibuyas, Coconut Oil"
+      "📦 Sangkap Check: 1-2 Itlog (para sa Sunny Side Up)"
     ],
     meals: [
-      "🥣 Lunch: Ginisang Monggo + Tokwa",
-      "🥩 Dinner: Tokwa 'Steak' na may Kamatis (Pritong tokwa sa kamatis sauce + Sunny side up egg sa ibabaw)",
+      "🥣 Lunch (1:00 PM): Ginisang Monggo + Tokwa",
+      "🥩 Dinner (8:00 PM): Tokwa 'Steak' na may Kamatis (Pritong tokwa + Sunny side up egg)",
       "💧 Hydration: Uminom ng 3L na Tubig"
     ],
     exercises: [
-      "🏃 Evening Jogging 4.5km",
-      "🔹 Full Body Calisthenics (12x3 reps):",
-      "  - Normal Pushup (15x3)",
-      "  - Diamond Pushup (12x3)",
-      "  - Pike Pushup (12x3)",
-      "  - Plank Up-Downs (12x3)",
-      "  - Jump Squat (12x3)",
-      "  - Pop Squat (12x3)",
-      "  - Squat to Calf Raise (15x3)"
+      "🏃 Evening Jogging 4.5km (5:00 PM)",
+      "🔹 Full Body Calisthenics (12x3 reps): Normal/Diamond/Pike Pushup, Plank Up-Downs, Jump Squat"
     ]
   },
   {
     key: "sun", name: "Sunday", date: "Linggo", tag: "market", isMarketDay: true,
     market: [
-      "🥚 Bumili ng 1 Dozen Eggs (stock para sa buong linggo)",
-      "🌱 Dried Monggo (1-2 packs)",
-      "Tokwa (1-2 blocks para sa dinner)",
-      "Ampalaya (1 piraso)"
+      "🛒 [5:00 PM Jog Run] Bumili ng 1 Dozen Eggs (stock para sa buong linggo)",
+      "🛒 Dried Monggo (1-2 packs)",
+      "🛒 Tokwa (1-2 blocks para sa dinner at Lunes Lunch)",
+      "🛒 Ampalaya (1 piraso)"
     ],
     meals: [
-      "🥗 Lunch: Tokwa at Ampalaya",
-      "🍳 Dinner: Ginisang Ampalaya, Tokwa, Itlog (Pigaan ng asin ang ampalaya para bawas pait)",
+      "🥗 Lunch (1:00 PM): Tokwa / Leftover Steak or Monggo",
+      "🍳 Dinner (8:00 PM): Ginisang Ampalaya, Tokwa, Itlog (Pigaan ng asin ang ampalaya)",
       "💧 Hydration: Light recovery water"
     ],
     exercises: [
-      "🏃 Night Jog 3km (Palengke Run)",
-      "🧘 Rest Day / Light Recovery Stretching (15 mins)",
-      "🚶 Mobility Routine"
+      "🏃 Night Jog 3km (Palengke Run sa Hapon - 5:00 PM)",
+      "🧘 Rest Day / Light Recovery Stretching (15 mins) & Mobility Routine"
     ]
   }
 ];
 
 const HABITS = [
-  { key: "wake", label: "Gising ng 12:00 NN" },
-  { key: "water", label: "3L Tubig Araw-araw" },
-  { key: "lunch", label: "Lunch on Time" },
-  { key: "move", label: "Workout / Jog Completed" },
-  { key: "dinner", label: "Dinner (No-Rice)" }
+  { key: "wake", label: "Gising ng 12:00 NN & Inom Tubig", deadlineHour: 13 }, // Locked after 1 PM
+  { key: "lunch", label: "Tanghalian / Lunch (1:00 PM)", deadlineHour: 15 },   // Locked after 3 PM
+  { key: "workout", label: "Calisthenics Workout (4:00 PM)", deadlineHour: 17 },// Locked after 5 PM
+  { key: "move", label: "Jogging & Market Run (5:00 PM)", deadlineHour: 19 },   // Locked after 7 PM
+  { key: "dinner", label: "Hapunan / Dinner (8:00 PM)", deadlineHour: 22 }     // Locked after 10 PM
 ];
 
 // ============================================================
-// 3. STORAGE & STATE MANAGEMENT (Local + Cloud)
+// 3. REAL-TIME CLOCK & TIME-LOCK ENGINE
 // ============================================================
-const STORAGE_KEY = "lingguhang-grind-master-v5";
+function startLiveClock() {
+  setInterval(() => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: true });
+    const dateStr = now.toLocaleDateString('tl-PH', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+
+    // Clock sa Dashboard
+    const clockTimeEl = document.getElementById('clockTime');
+    const clockDateEl = document.getElementById('clockDate');
+    if (clockTimeEl) clockTimeEl.textContent = timeStr;
+    if (clockDateEl) clockDateEl.textContent = dateStr;
+
+    // Clock sa Login Modal (kung may element)
+    const loginClockEl = document.getElementById('loginClock');
+    if (loginClockEl) loginClockEl.textContent = `${dateStr} | ${timeStr}`;
+
+    // Awtomatikong Time-Check at Alarm Reminders
+    checkTimeAlarms(now);
+    checkSundayNightAutoReset(now);
+  }, 1000);
+}
+
+// Function para suriin kung ang isang task ay locked na (Missed Deadline)
+function isTaskTimeLocked(dayKey, deadlineHour) {
+  const now = new Date();
+  const order = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const currentDayIndex = now.getDay();
+  const taskDayIndex = order.indexOf(dayKey);
+
+  // Kung ang araw ay nakalipas na ngayong linggo -> LOCKED
+  if (taskDayIndex < currentDayIndex) return true;
+
+  // Kung araw ngayon pero lagpas na sa deadline hour -> LOCKED
+  if (taskDayIndex === currentDayIndex && now.getHours() >= deadlineHour) return true;
+
+  return false; // Bukas pa at pwedeng sagutan
+}
+
+// ============================================================
+// 4. ALARM & NOTIFICATION REMINDERS
+// ============================================================
+let lastTriggeredHour = -1;
+
+function checkTimeAlarms(now) {
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  if (currentMinute === 0 && currentHour !== lastTriggeredHour) {
+    lastTriggeredHour = currentHour;
+    
+    let msg = "";
+    if (currentHour === 12) msg = "⏰ 12:00 NN: Oras na para gumising at uminom ng 1L na tubig!";
+    if (currentHour === 13) msg = "🥣 1:00 PM: Oras na ng iyong Tanghalian / Lunch!";
+    if (currentHour === 16) msg = "🏋️ 4:00 PM: Oras na para sa iyong Calisthenics Workout!";
+    if (currentHour === 17) msg = "🏃 5:00 PM: Oras na para sa Jogging & Palengke Run!";
+    if (currentHour === 20) msg = "🍳 8:00 PM: Oras na ng Hapunan / Dinner (No-Rice)!";
+
+    if (msg !== "") {
+      playAlarmSound();
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Lingguhang Grind Reminder", { body: msg, icon: "🌱" });
+      } else {
+        alert(msg);
+      }
+    }
+  }
+}
+
+function requestNotificationPermission() {
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+}
+
+function playAlarmSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+// ============================================================
+// 5. AUTOMATIC SUNDAY NIGHT RESET & RECORD
+// ============================================================
+let hasAutoRecordedThisWeek = false;
+
+function checkSundayNightAutoReset(now) {
+  // Linggo (Day 0) at 11:50 PM pataas
+  if (now.getDay() === 0 && now.getHours() === 23 && now.getMinutes() >= 50) {
+    if (!hasAutoRecordedThisWeek) {
+      hasAutoRecordedThisWeek = true;
+
+      let totalAll = 0;
+      let doneAll = 0;
+
+      WEEK_DATA.forEach(day => {
+        const stats = getDayStats(day);
+        totalAll += stats.total;
+        doneAll += stats.done;
+      });
+
+      const weekPct = totalAll === 0 ? 0 : Math.round((doneAll / totalAll) * 100);
+
+      // Save sa History
+      state.history.push({
+        date: now.toLocaleDateString('tl-PH'),
+        score: weekPct
+      });
+
+      // Clear checkboxes para sa bagong linggo
+      state.market = {};
+      state.exercises = {};
+      state.meals = {};
+      state.habits = {};
+
+      saveState();
+      renderAll();
+      console.log("Automatic Sunday Night Record & Reset Completed!");
+    }
+  } else {
+    hasAutoRecordedThisWeek = false;
+  }
+}
+
+// ============================================================
+// 6. STORAGE & STATE MANAGEMENT
+// ============================================================
+const STORAGE_KEY = "lingguhang-grind-master-v6";
 
 function loadState() {
   try {
@@ -261,8 +324,8 @@ function getDefaultState() {
     habits: {},
     focus: {
       startDate: new Date().toISOString().split('T')[0],
-      focus: "Palengke run + 4.5km Jog & Pushup circuits!",
-      reward: "Bagong athletic gear / Cheat meal",
+      focus: "5 PM Palengke Run + Calisthenics Circuits & Tokwa Meal Prep",
+      reward: "Bagong Athletic Gear / Cheat Meal",
       affirmation: "Walang susuko, pitong laban!"
     },
     history: []
@@ -270,10 +333,7 @@ function getDefaultState() {
 }
 
 function saveState() {
-  // Save sa LocalStorage
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-  // Sync sa Cloud Firestore kung naka-login ang user
   const user = auth.currentUser;
   if (user) {
     db.collection("users").doc(user.uid).set(state)
@@ -284,7 +344,7 @@ function saveState() {
 let state = loadState();
 
 // ============================================================
-// 4. HELPERS
+// 7. HELPERS & ANALYTICS
 // ============================================================
 function todayKey() {
   const jsDay = new Date().getDay();
@@ -331,7 +391,7 @@ function getHabitCompletion(habitKey) {
 }
 
 // ============================================================
-// 5. RENDER — Controls & Focus
+// 8. RENDER FUNCTIONS WITH TIME-LOCK INTEGRATION
 // ============================================================
 function renderFocusControls() {
   const weekStartDate = document.getElementById('weekStartDate');
@@ -359,59 +419,12 @@ if (saveFocusBtn) {
   });
 }
 
-// ============================================================
-// 6. RENDER — Category Analytics
-// ============================================================
-function renderCategoryAnalytics() {
-  // Market / Inventory
-  const mStats = getCategoryStats('market');
-  const mPct = Math.round(mStats.pct * 100);
-  const marketPctText = document.getElementById('marketPctText');
-  const marketCountText = document.getElementById('marketCountText');
-  if (marketPctText) marketPctText.textContent = mPct + '%';
-  if (marketCountText) marketCountText.textContent = `${mStats.done} / ${mStats.total} Checkmarks`;
-  updateRing('marketRingFill', mStats.pct, 36);
-
-  // Exercise
-  const eStats = getCategoryStats('exercises');
-  const ePct = Math.round(eStats.pct * 100);
-  const exercisePctText = document.getElementById('exercisePctText');
-  const exerciseCountText = document.getElementById('exerciseCountText');
-  if (exercisePctText) exercisePctText.textContent = ePct + '%';
-  if (exerciseCountText) exerciseCountText.textContent = `${eStats.done} / ${eStats.total} Routines`;
-  updateRing('exerciseRingFill', eStats.pct, 36);
-
-  // Meal
-  const mealStats = getCategoryStats('meals');
-  const mealPct = Math.round(mealStats.pct * 100);
-  const mealPctText = document.getElementById('mealPctText');
-  const mealCountText = document.getElementById('mealCountText');
-  if (mealPctText) mealPctText.textContent = mealPct + '%';
-  if (mealCountText) mealCountText.textContent = `${mealStats.done} / ${mealStats.total} Meals`;
-  updateRing('mealRingFill', mealStats.pct, 36);
-}
-
-function updateRing(elementId, pct, radius) {
-  const ring = document.getElementById(elementId);
-  if (!ring) return;
-  const circ = 2 * Math.PI * radius;
-  const offset = circ * (1 - pct);
-  ring.style.strokeDasharray = circ;
-  ring.style.opacity = pct <= 0.001 ? "0" : "1";
-  requestAnimationFrame(() => { ring.style.strokeDashoffset = offset; });
-}
-
-// ============================================================
-// 7. RENDER — Habit Tracker & Trend Chart
-// ============================================================
-let habitLineChartInstance = null;
-
 function renderHabitsSection() {
   const headRow = document.getElementById('habitHeadRow');
   const body = document.getElementById('habitBody');
   if (!headRow || !body) return;
 
-  headRow.innerHTML = `<th>Habit</th>` +
+  headRow.innerHTML = `<th>Habit Time Lock</th>` +
     WEEK_DATA.map(d => `<th>${d.name.slice(0,3)}</th>`).join('') +
     `<th>Progress</th>`;
 
@@ -433,8 +446,16 @@ function renderHabitsSection() {
     row.innerHTML = `
       <td class="habit-title" title="${habit.label}">${habit.label}</td>
       ${WEEK_DATA.map(day => {
-        const checked = (state.habits[day.key] && state.habits[day.key][habit.key]) ? "checked" : "";
-        return `<td><input type="checkbox" class="habit-checkbox" data-habit="${habit.key}" data-day="${day.key}" ${checked}></td>`;
+        const isChecked = (state.habits[day.key] && state.habits[day.key][habit.key]);
+        const isLocked = isTaskTimeLocked(day.key, habit.deadlineHour) && !isChecked;
+        const disabledAttr = isLocked ? "disabled" : "";
+        const checkedAttr = isChecked ? "checked" : "";
+        const titleAttr = isLocked ? "title='🔒 Lagpas na sa oras! Hindi na pwedeng i-check.'" : "";
+
+        return `<td>
+          <input type="checkbox" class="habit-checkbox ${isLocked ? 'locked-box' : ''}" 
+            data-habit="${habit.key}" data-day="${day.key}" ${checkedAttr} ${disabledAttr}${titleAttr}>
+        </td>`;
       }).join('')}
       <td>
         <span class="mini-bar-bg"><span class="mini-bar-fill" style="width:${pctInt}%"></span></span>
@@ -455,42 +476,39 @@ function renderHabitsSection() {
     });
   });
 
-  // Habit Chart
+  // Render Habit Line Chart
   const habitChartEl = document.getElementById('habitLineChart');
-  if (!habitChartEl) return;
-  const ctx = habitChartEl.getContext('2d');
-  if (habitLineChartInstance) habitLineChartInstance.destroy();
+  if (habitChartEl) {
+    const ctx = habitChartEl.getContext('2d');
+    if (window.habitLineChartInstance) window.habitLineChartInstance.destroy();
 
-  habitLineChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [{
-        label: 'Habit %',
-        data: dailyHabitScores,
-        borderColor: '#e4b33d',
-        backgroundColor: 'rgba(228, 179, 61, 0.15)',
-        fill: true,
-        tension: 0.3,
-        borderWidth: 2,
-        pointRadius: 3
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min: 0, max: 100, ticks: { color: '#8a8a9a', font: { size: 9 } }, grid: { color: '#262632' } },
-        x: { ticks: { color: '#8a8a9a', font: { size: 9 } }, grid: { color: '#262632' } }
+    window.habitLineChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Habit %',
+          data: dailyHabitScores,
+          borderColor: '#e4b33d',
+          backgroundColor: 'rgba(228, 179, 61, 0.15)',
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 100, ticks: { color: '#8a8a9a', font: { size: 9 } }, grid: { color: '#262632' } },
+          x: { ticks: { color: '#8a8a9a', font: { size: 9 } }, grid: { color: '#262632' } }
+        }
       }
-    }
-  });
+    });
+  }
 }
 
-// ============================================================
-// 8. RENDER — 7 Day Columns Grid
-// ============================================================
 const daysGrid = document.getElementById('daysGrid');
 
 function renderDaysGrid() {
@@ -506,12 +524,12 @@ function renderDaysGrid() {
     const col = document.createElement('div');
     col.className = `day-column ${isToday ? 'is-today' : ''}`;
 
-    const marketHeaderTitle = day.isMarketDay ? "🛒 Pagbili sa Palengke" : "📦 Inventory / Sangkap Check";
+    const marketHeaderTitle = day.isMarketDay ? "🛒 5:00 PM Palengke Run" : "📦 Inventory / Sangkap Check";
 
     col.innerHTML = `
       <div class="day-col-header">
         <div class="day-col-title">${day.name}</div>
-        <div class="day-col-date">${day.date} ${day.isMarketDay ? "• Palengke Run" : ""}</div>
+        <div class="day-col-date">${day.date} ${day.isMarketDay ? "• Market 5PM" : ""}</div>
       </div>
 
       <div class="day-col-gauge">
@@ -524,46 +542,46 @@ function renderDaysGrid() {
 
       <div class="day-col-content">
         
-        <!-- MARKET OR INVENTORY CHECKLIST -->
+        <!-- MARKET OR INVENTORY -->
         <div>
           <div class="section-label">${marketHeaderTitle}</div>
           <div class="col-task-list">
             ${day.market.map((item, i) => {
-              const checked = (state.market[day.key] || [])[i] ? "checked" : "";
-              const doneClass = (state.market[day.key] || [])[i] ? "done" : "";
-              return `<label class="col-task-item">
-                <input type="checkbox" data-cat="market" data-day="${day.key}" data-index="${i}" ${checked}>
-                <span class="${doneClass}">${item}</span>
+              const isChecked = (state.market[day.key] || [])[i];
+              const isLocked = isTaskTimeLocked(day.key, 19) && !isChecked; // Locked after 7 PM
+              return `<label class="col-task-item ${isLocked ? 'item-locked' : ''}">
+                <input type="checkbox" data-cat="market" data-day="${day.key}" data-index="${i}" ${isChecked ? "checked" : ""} ${isLocked ? "disabled" : ""}>
+                <span class="${isChecked ? "done" : ""}">${item}${isLocked ? "🔒" : ""}</span>
               </label>`;
             }).join('')}
           </div>
         </div>
 
-        <!-- EXERCISE CHECKLIST -->
+        <!-- EXERCISES -->
         <div>
           <div class="section-label">🏋️ Exercises Routine</div>
           <div class="col-task-list">
             ${day.exercises.map((ex, i) => {
-              const checked = (state.exercises[day.key] || [])[i] ? "checked" : "";
-              const doneClass = (state.exercises[day.key] || [])[i] ? "done" : "";
-              return `<label class="col-task-item">
-                <input type="checkbox" data-cat="exercises" data-day="${day.key}" data-index="${i}" ${checked}>
-                <span class="${doneClass}">${ex}</span>
+              const isChecked = (state.exercises[day.key] || [])[i];
+              const isLocked = isTaskTimeLocked(day.key, 19) && !isChecked; // Locked after 7 PM
+              return `<label class="col-task-item ${isLocked ? 'item-locked' : ''}">
+                <input type="checkbox" data-cat="exercises" data-day="${day.key}" data-index="${i}" ${isChecked ? "checked" : ""} ${isLocked ? "disabled" : ""}>
+                <span class="${isChecked ? "done" : ""}">${ex}${isLocked ? "🔒" : ""}</span>
               </label>`;
             }).join('')}
           </div>
         </div>
 
-        <!-- MEAL PLAN CHECKLIST -->
+        <!-- MEALS -->
         <div>
           <div class="section-label">🥗 Meal Plan & Cooking Guide</div>
           <div class="col-task-list">
             ${day.meals.map((m, i) => {
-              const checked = (state.meals[day.key] || [])[i] ? "checked" : "";
-              const doneClass = (state.meals[day.key] || [])[i] ? "done" : "";
-              return `<label class="col-task-item">
-                <input type="checkbox" data-cat="meals" data-day="${day.key}" data-index="${i}" ${checked}>
-                <span class="${doneClass}">${m}</span>
+              const isChecked = (state.meals[day.key] || [])[i];
+              const isLocked = isTaskTimeLocked(day.key, 22) && !isChecked; // Locked after 10 PM
+              return `<label class="col-task-item ${isLocked ? 'item-locked' : ''}">
+                <input type="checkbox" data-cat="meals" data-day="${day.key}" data-index="${i}" ${isChecked ? "checked" : ""} ${isLocked ? "disabled" : ""}>
+                <span class="${isChecked ? "done" : ""}">${m}${isLocked ? "🔒" : ""}</span>
               </label>`;
             }).join('')}
           </div>
@@ -608,15 +626,37 @@ function onCheckToggle(e) {
   renderOverallWidget();
 }
 
-// ============================================================
-// 9. RENDER — Overall Progress Bar & Donut Gauge
-// ============================================================
-let barChartInstance = null;
+function renderCategoryAnalytics() {
+  const mStats = getCategoryStats('market');
+  const eStats = getCategoryStats('exercises');
+  const mealStats = getCategoryStats('meals');
+
+  if (document.getElementById('marketPctText')) document.getElementById('marketPctText').textContent = Math.round(mStats.pct * 100) + '%';
+  if (document.getElementById('marketCountText')) document.getElementById('marketCountText').textContent = `${mStats.done} / ${mStats.total}`;
+  updateRing('marketRingFill', mStats.pct, 36);
+
+  if (document.getElementById('exercisePctText')) document.getElementById('exercisePctText').textContent = Math.round(eStats.pct * 100) + '%';
+  if (document.getElementById('exerciseCountText')) document.getElementById('exerciseCountText').textContent = `${eStats.done} / ${eStats.total}`;
+  updateRing('exerciseRingFill', eStats.pct, 36);
+
+  if (document.getElementById('mealPctText')) document.getElementById('mealPctText').textContent = Math.round(mealStats.pct * 100) + '%';
+  if (document.getElementById('mealCountText')) document.getElementById('mealCountText').textContent = `${mealStats.done} / ${mealStats.total}`;
+  updateRing('mealRingFill', mealStats.pct, 36);
+}
+
+function updateRing(elementId, pct, radius) {
+  const ring = document.getElementById(elementId);
+  if (!ring) return;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ * (1 - pct);
+  ring.style.strokeDasharray = circ;
+  ring.style.opacity = pct <= 0.001 ? "0" : "1";
+  requestAnimationFrame(() => { ring.style.strokeDashoffset = offset; });
+}
 
 function renderOverallWidget() {
   let totalAll = 0;
   let doneAll = 0;
-
   const donePerDay = [];
   const leftPerDay = [];
 
@@ -624,58 +664,42 @@ function renderOverallWidget() {
     const stats = getDayStats(day);
     totalAll += stats.total;
     doneAll += stats.done;
-
     donePerDay.push(stats.done);
     leftPerDay.push(stats.total - stats.done);
   });
 
   const weekPct = totalAll === 0 ? 0 : doneAll / totalAll;
-  const pctInt = Math.round(weekPct * 100);
+  if (document.getElementById('overallPercentText')) document.getElementById('overallPercentText').textContent = Math.round(weekPct * 100) + '%';
+  if (document.getElementById('completedCounterText')) document.getElementById('completedCounterText').textContent = `${doneAll} / ${totalAll} Done`;
 
-  const overallPercentText = document.getElementById('overallPercentText');
-  const completedCounterText = document.getElementById('completedCounterText');
-  if (overallPercentText) overallPercentText.textContent = pctInt + '%';
-  if (completedCounterText) completedCounterText.textContent = `${doneAll} / ${totalAll} Done`;
-
-  const ringFill = document.getElementById('overallRingFill');
-  if (ringFill) {
-    const circumference = 2 * Math.PI * 40;
-    const offset = circumference * (1 - weekPct);
-    ringFill.style.strokeDasharray = circumference;
-    ringFill.style.opacity = weekPct <= 0.001 ? "0" : "1";
-    requestAnimationFrame(() => { ringFill.style.strokeDashoffset = offset; });
-  }
+  updateRing('overallRingFill', weekPct, 40);
 
   const overallBarChartEl = document.getElementById('overallBarChart');
-  if (!overallBarChartEl) return;
-  const ctx = overallBarChartEl.getContext('2d');
-  if (barChartInstance) barChartInstance.destroy();
+  if (overallBarChartEl) {
+    const ctx = overallBarChartEl.getContext('2d');
+    if (window.barChartInstance) window.barChartInstance.destroy();
 
-  barChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [
-        { label: 'Done', data: donePerDay, backgroundColor: '#ffffff' },
-        { label: 'Left', data: leftPerDay, backgroundColor: '#262632' }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { stacked: true, grid: { display: false }, ticks: { color: '#8a8a9a', font: { size: 9 } } },
-        y: { stacked: true, grid: { color: '#1a1a22' }, ticks: { color: '#8a8a9a', font: { size: 9 } } }
+    window.barChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+          { label: 'Done', data: donePerDay, backgroundColor: '#ffffff' },
+          { label: 'Left', data: leftPerDay, backgroundColor: '#262632' }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: '#8a8a9a', font: { size: 9 } } },
+          y: { stacked: true, grid: { color: '#1a1a22' }, ticks: { color: '#8a8a9a', font: { size: 9 } } }
+        }
       }
-    }
-  });
+    });
+  }
 }
-
-// ============================================================
-// 10. RENDER — History Chart
-// ============================================================
-let historyChartInstance = null;
 
 function renderHistoryChart() {
   const historyChartEl = document.getElementById('historyChart');
@@ -685,9 +709,9 @@ function renderHistoryChart() {
   const labels = state.history.map((_, i) => `Week ${i + 1}`);
   const scores = state.history.map(item => item.score);
 
-  if (historyChartInstance) historyChartInstance.destroy();
+  if (window.historyChartInstance) window.historyChartInstance.destroy();
 
-  historyChartInstance = new Chart(ctx, {
+  window.historyChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels.length ? labels : ['No records yet'],
@@ -698,8 +722,7 @@ function renderHistoryChart() {
         backgroundColor: 'rgba(255, 255, 255, 0.12)',
         fill: true,
         tension: 0.3,
-        borderWidth: 2,
-        pointRadius: 4
+        borderWidth: 2
       }]
     },
     options: {
@@ -708,19 +731,17 @@ function renderHistoryChart() {
       scales: {
         y: { min: 0, max: 100, ticks: { color: '#8a8a9a' }, grid: { color: '#262632' } },
         x: { ticks: { color: '#8a8a9a' }, grid: { color: '#262632' } }
-      },
-      plugins: { legend: { labels: { color: '#f2f2f7' } } }
+      }
     }
   });
 }
 
-// Reset button handler
+// Reset Button Handler
 const resetWeekBtn = document.getElementById('resetWeekBtn');
 if (resetWeekBtn) {
   resetWeekBtn.addEventListener('click', () => {
     let totalAll = 0;
     let doneAll = 0;
-
     WEEK_DATA.forEach(day => {
       const stats = getDayStats(day);
       totalAll += stats.total;
@@ -747,28 +768,23 @@ if (resetWeekBtn) {
 }
 
 // ============================================================
-// 11. AUTHENTICATION HANDLERS & CLOUD SYNC
+// 9. AUTHENTICATION & CLOUD SYNC
 // ============================================================
-
-// Function para itago ang Login Popup at Ipakita ang Dashboard
 function showDashboard() {
   const overlay = document.getElementById('authOverlay');
   const appContent = document.getElementById('appContent');
-  
   if (overlay) overlay.style.display = 'none';
   if (appContent) appContent.style.display = 'block';
+  requestNotificationPermission();
 }
 
-// Function para ipakita ang Login at Itago ang Dashboard
 function showLogin() {
   const overlay = document.getElementById('authOverlay');
   const appContent = document.getElementById('appContent');
-  
   if (overlay) overlay.style.display = 'flex';
   if (appContent) appContent.style.display = 'none';
 }
 
-// Form Submit Event Handler (Login / Auto-Register)
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
@@ -783,7 +799,6 @@ if (loginForm) {
       await auth.signInWithEmailAndPassword(email, password);
       showDashboard();
     } catch (error) {
-      // Kung wala pang account, awtomatikong igagawa ng account
       if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         try {
           await auth.createUserWithEmailAndPassword(email, password);
@@ -798,53 +813,37 @@ if (loginForm) {
   });
 }
 
-// Logout Button Handler
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => {
-      showLogin();
-    });
+    auth.signOut().then(() => showLogin());
   });
 }
 
-// Auth State Listener & Firestore Cloud Sync
 auth.onAuthStateChanged((user) => {
   if (user) {
-    // 1. Ipakita ang Dashboard UI
     showDashboard();
-
-    // 2. I-display ang Email ng User sa Header
     const userEmailTag = document.getElementById('userEmailTag');
-    if (userEmailTag) {
-      userEmailTag.textContent = user.email;
-    }
+    if (userEmailTag) userEmailTag.textContent = user.email;
 
-    // 3. I-fetch ang User Data mula sa Firestore
     db.collection("users").doc(user.uid).get()
       .then((doc) => {
         if (doc.exists) {
           state = doc.data();
-          if (typeof STORAGE_KEY !== 'undefined') {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } else {
-          if (typeof saveState === 'function') saveState();
+          saveState();
         }
-        if (typeof renderAll === 'function') renderAll();
+        renderAll();
       })
-      .catch((err) => {
-        console.error("Cloud fetch error:", err);
-      });
-
+      .catch((err) => console.error("Cloud fetch error:", err));
   } else {
-    // Kapag walang naka-login, ibalik sa Login Screen
     showLogin();
   }
 });
 
 // ============================================================
-// 12. INITIALIZATION
+// 10. INITIALIZATION
 // ============================================================
 function renderAll() {
   renderFocusControls();
@@ -855,4 +854,6 @@ function renderAll() {
   renderHistoryChart();
 }
 
+// Simulan ang Live Clock at Application
+startLiveClock();
 renderAll();
